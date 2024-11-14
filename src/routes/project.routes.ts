@@ -1,10 +1,11 @@
-import express from 'express';
+import express, { Router } from 'express';
+import { createProject, getProjects, getProjectById } from '../controllers/project.controller';
+import { projectValidation } from '../middleware/validation';
 
-const router = express.Router();
+const router: Router = express.Router();
 
-// Placeholder routes - we'll implement these next
-router.get('/', (req, res) => {
-  res.json({ message: 'Projects route working' });
-});
+router.post('/', projectValidation, createProject as express.RequestHandler);
+router.get('/', getProjects as express.RequestHandler);
+router.get('/:id', getProjectById as express.RequestHandler);
 
 export default router;

@@ -1,10 +1,17 @@
-import express from 'express';
+import express, { Router } from 'express';
+import { 
+  createIssue, 
+  getIssues, 
+  updateIssueStatus, 
+  addComment 
+} from '../controllers/issue.controller';
+import { issueValidation, commentValidation } from '../middleware/validation';
 
-const router = express.Router();
+const router: Router = express.Router();
 
-// Placeholder routes - we'll implement these next
-router.get('/', (req, res) => {
-  res.json({ message: 'Issues route working' });
-});
+router.post('/', issueValidation, createIssue as express.RequestHandler);
+router.get('/', getIssues as express.RequestHandler);
+router.patch('/:id/status', updateIssueStatus as express.RequestHandler);
+router.post('/:id/comments', commentValidation, addComment as express.RequestHandler);
 
 export default router;
