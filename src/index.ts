@@ -7,6 +7,7 @@ import projectRoutes from './routes/project.routes';
 import issueRoutes from './routes/issue.routes';
 import authRoutes from './routes/auth.routes';  // Add this import
 import { authMiddleware } from './middleware/auth.middleware';
+import notificationRoutes from './routes/notification.routes';
 
 const app = express();
 const server = http.createServer(app);
@@ -22,6 +23,7 @@ app.use('/api/users', authMiddleware, userRoutes);
 app.use('/api/teams', authMiddleware, teamRoutes);
 app.use('/api/projects', authMiddleware, projectRoutes);
 app.use('/api/issues', authMiddleware, issueRoutes);
+app.use('/api/notifications', authMiddleware, notificationRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

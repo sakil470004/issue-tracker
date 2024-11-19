@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { PrismaClient, Priority, Status, Prisma } from "@prisma/client";
 import { validationResult } from "express-validator";
 import { wsService } from "../index";
+import { notificationService } from '../services/notification.service';
 
 const prisma = new PrismaClient();
 
@@ -254,7 +255,15 @@ export const updateIssueStatus = async (
     });
 
     wsService.emitToProject(issue.projectId, "ISSUE_UPDATED", issue);
-
+    if (issue.assignedTo) {
+      await notificationService.createNotification({
+        type: 'STATUS_CHANGED',
+        title: 'Issue Status Updated',
+        message: `Issue "${issue.title}" status changed to ${status}`,
+        userId: issue.assignedTo.id,
+        issueId: issue.id
+      });
+    }
     res.json(issue);
   } catch (error) {
     console.error("Update issue status error:", error);
@@ -304,7 +313,28 @@ export const addComment = async (
     });
 
     wsService.emitToProject(id, "ISSUE_COMMENTED", { issueId: id, comment });
-
+    const mentionRegex = /@([a-zA-Z0-9-]+)/g;
+    const mentions = content.match(mentionRegex);
+    
+    if (mentions) {
+      const mentionedUsers = await prisma.user.findMany({
+        where: {
+          name: {
+            in: mentions.map(m => m.substring(1))
+          }
+        }
+      });
+    
+      for (const user of mentionedUsers) {
+        await notificationService.createNotification({
+          type: 'MENTIONED',
+          title: 'You were mentioned',
+          message: `You were mentioned in a comment on issue "${issue.title}"`,
+          userId: user.id,
+          issueId: id
+        });
+      }
+    }
     res.status(201).json(comment);
   } catch (error) {
     console.error("Add comment error:", error);
