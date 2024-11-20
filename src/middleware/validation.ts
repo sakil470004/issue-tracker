@@ -1,6 +1,7 @@
-import { body } from 'express-validator';
+import { body, query, ValidationChain } from 'express-validator';
 import { Priority, Status } from '@prisma/client';
 
+// Existing validations
 export const loginValidation = [
   body('email').isEmail().withMessage('Must be a valid email'),
   body('password').exists().withMessage('Password is required')
@@ -51,7 +52,6 @@ export const projectValidation = [
     .withMessage('Team ID is required')
 ];
 
-
 export const issueValidation = [
   body('title')
     .isString()
@@ -84,4 +84,26 @@ export const commentValidation = [
     .isString()
     .isLength({ min: 1 })
     .withMessage('Comment cannot be empty')
+];
+
+export const searchValidation: ValidationChain[] = [
+  query('search').optional().isString(),
+  query('status').optional().isString(),
+  query('priority').optional().isString(),
+  query('assigneeId').optional().isUUID(),
+  query('creatorId').optional().isUUID(),
+  query('teamId').optional().isUUID(),
+  query('projectId').optional().isUUID(),
+  query('labels').optional().isString(),
+  query('startDate').optional().isISO8601(),
+  query('endDate').optional().isISO8601(),
+  query('page').optional().isInt({ min: 1 }),
+  query('limit').optional().isInt({ min: 1, max: 100 }),
+  query('sortBy').optional().isIn(['createdAt', 'updatedAt', 'priority', 'status']),
+  query('sortOrder').optional().isIn(['asc', 'desc'])
+];
+
+export const saveFilterValidation = [
+  body('name').isString().notEmpty().withMessage('Filter name is required'),
+  body('filter').isObject().withMessage('Filter must be an object')
 ];

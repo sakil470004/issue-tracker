@@ -12,6 +12,7 @@ import notificationRoutes from './routes/notification.routes';
 const app = express();
 const server = http.createServer(app);
 const wsService = new WebSocketService(server);
+import searchRoutes from './routes/search.routes';
 
 app.use(express.json());
 
@@ -24,6 +25,7 @@ app.use('/api/teams', authMiddleware, teamRoutes);
 app.use('/api/projects', authMiddleware, projectRoutes);
 app.use('/api/issues', authMiddleware, issueRoutes);
 app.use('/api/notifications', authMiddleware, notificationRoutes);
+app.use('/api/search', authMiddleware, searchRoutes);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
